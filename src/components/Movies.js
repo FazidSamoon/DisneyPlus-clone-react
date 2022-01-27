@@ -1,15 +1,30 @@
 import React from 'react';
 import styled from 'styled-components';
+import { selectMovies } from "../features/movie/movieSlice"
+import { useSelector } from "react-redux"
+import { Link } from "react-router-dom"
 
 function Movies() {
+
+    const movies = useSelector(selectMovies);
   return (
   <Container>
       <h1>Recommended for you</h1>
 
       <Content>
-        <Wrap>
-            <img src='https://theubj.com/wp-content/uploads/2021/12/spid.jpg' />
-        </Wrap>
+
+        {movies && 
+            movies.map((movie) =>{
+                <Wrap key = {movie.id}>
+                    <Link to ={`/detail/${movie.id}`}>
+                        <img src= {movie.cardImg} />
+                    </Link>
+                    
+                </Wrap>
+            })
+        }
+
+        
 
         <Wrap>
             <img src='https://theubj.com/wp-content/uploads/2021/12/spid.jpg' />

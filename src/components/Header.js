@@ -1,11 +1,61 @@
-import React from 'react';
+import React , {useEffect} from 'react';
 import styled from 'styled-components'
+import {selectUsername, selectUserPhoto, setUserLogin, setSignOut} from "../features/user/userSlice"
+import {useSelector, useDispatch} from "react-redux"
+import {auth, provider} from "../firebase"
+import {useNavigate} from "react-router-dom"
+
 
 function Header() {
+  const dispatch = useDispatch();
+  const userName = useSelector(selectUsername);
+  const userImg = useSelector(selectUserPhoto);
+  const history = useNavigate();
+
+  const signIn = () => {
+      auth.signInWithPopup(provider).
+      then((result) => {
+        let user = result.user;
+        dispatch(setUserLogin({
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL
+        }))
+        history.push("/")
+      })
+  }
+
+  const signOut = () => {
+    auth.signOut().
+    then(() => {
+      dispatch(setSignOut())
+      history.push("/login")
+    })
+  }
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if(user){
+        dispatch(setUserLogin({
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL
+        }))
+
+        history.push("/")
+      }
+    })
+  }, [])
+
   return (
+    
     <NavBar>
       <Logo src="images/logo.svg" />
-      <NavMenu>
+      { !userName ?
+        <Login onClick={signIn}>Login</Login> :
+        
+        <>
+          <NavMenu>
           <a>
             <img src="/images/home-icon.svg" />
             <span>HOME</span>
@@ -38,7 +88,11 @@ function Header() {
           
       </NavMenu>
 
-      <UserImg src='/images/fazid.jpg'/>
+      <UserImg src={userImg} onClick={signOut}/>
+        </>
+
+      }
+      
     </NavBar>
   );
 }
@@ -51,6 +105,7 @@ const NavBar = styled.nav`
     background: #090b13;
     align-items: center;
     padding: 0 36px;
+    justify-content: space-between;
 `
 
 const Logo = styled.img`
@@ -110,4 +165,21 @@ const UserImg = styled.img`
     border-radius: 50%;
     object-fit: cover;
     cursor: pointer;
+`
+
+const Login = styled.div`
+    border: 1px solid #f9f9f9;
+    padding: 8px 15px;
+    border-radius: 4px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background-color: rgba(0,0,0,0.6);
+    transition: all 0.2s ease 0s;
+    cursor:pointer;
+
+    &:hover{
+      background-color: #f9f9f9;
+      border-color: transparent;
+      color: #000;
+    }
 `

@@ -1,16 +1,39 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-
+import { useParams } from "react-router-dom"
+import db from "../firebase"
+import { collection, query } from 'firebase/firestore';
+import { setMovies } from '../features/movie/movieSlice';
 
 function Detail() {
+
+  const {id} = useParams();
+  const [movie, setMovie] = useState();
+
+  useEffect(() =>{
+      const q = query(collection(db, "movies"))
+      .doc(id)
+      .get()
+      .then((doc) => {
+        if(doc.exists){
+          setMovies(doc.data());
+        }
+        else{
+
+        }
+      })
+  }, [])
+
   return (
     <Container>
-        <Background>
-          <img src='http://images6.fanpop.com/image/photos/40000000/The-Finest-Hours-Banner-movie-trailers-40025062-1200-638.jpg' />
+      {movie && 
+        <>
+          <Background>
+          <img src={movie.backgroundImg} />
         </Background>
 
         <ImgTitle>
-          <img src='https://static.rogerebert.com/redactor_assets/pictures/55d20036592cb034eb000156/TFH_LOGO_06_19_15.INT.jpg' />
+          <img src={movie.titleImg} />
         </ImgTitle>
 
         <Controls>
@@ -34,12 +57,16 @@ function Detail() {
         </Controls>
 
         <SubTitle>
-          2018 . 7m . Family. Action
+          {movie.SubTitle}
         </SubTitle>
 
         <Description>
-          sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+        {movie.Description}
         </Description>
+        </>
+
+      }
+        
     </Container>
   );
 }
@@ -70,6 +97,7 @@ const Background = styled.div`
 `
 
 const ImgTitle = styled.div`
+  margin-top:20px;
   height: 30vh;
   width: 35vw;
   min-height: 170px;
@@ -86,6 +114,7 @@ const ImgTitle = styled.div`
 const Controls = styled.div`
   display:flex;
   align-items:center;
+  margin-top:6px;
 `
 
 const PlayButton = styled.div`
@@ -150,7 +179,7 @@ const Description = styled.div`
     
     line-height: 1.4;
     font-size: 20px;
-    
+    max-width: 700px;
     margin-top: 16px;
     color : rgb(249,249,249);
 `
